@@ -11,10 +11,64 @@ function generateTaskId() {
 }
 
 // Todo: create a function to create a task card
-function createTaskCard(task) {}
+function createTaskCard(task) {
+  const taskCard = $("<div>")
+    .addClass("card project-card draggable my-3")
+    .attr("data-task-id", task.id);
+  const cardHeader = $("<div>").addClass("card-header h4").text(task.title);
+  const cardBody = $("<div>").addClass("card-body");
+  const cardDescription = $("<p>").addClass("card-text").text(task.description);
+  const cardDueDate = $("<p>").addClass("card-text").text(task.dueDate);
+  const cardDeleteBtn = $("<button>")
+    .addClass("btn btn-danger delete")
+    .text("Delete")
+    .attr("data-task-id", task.id);
+  cardDeleteBtn.on("click", handleDeleteTask);
+
+  // Background color based on due date
+  if (task.dueDate) {
+    const now = dayjs();
+    const dueDate = dayjs(task.dueDate);
+    if (now.isSame(dueDate, "day")) {
+      taskCard.addClass("bg-warning text-white");
+    } else if (now.isAfter(dueDate)) {
+      taskCard.addClass("bg-danger text-white");
+    }
+  }
+
+  cardBody.append(cardDescription, cardDueDate, cardDeleteBtn);
+  taskCard.append(cardHeader, cardBody);
+
+  return taskCard;
+}
 
 // Todo: create a function to render the task list and make cards draggable
-function renderTaskList() {}
+function renderTaskList() {
+  taskList = JSON.parse(localStorage.getItem("tasks")) || [];
+
+  if (taskList) {
+    taskList.forEach((task) => {
+      const taskCard = createTaskCard(task);
+      switch (task.status) {
+        case "to-do":
+          $("#todo-cards").append(taskCard);
+          break;
+        case "in-progress":
+          $("#in-progress-cards").append(taskCard);
+          break;
+        case "done":
+          $("#done-cards").append(taskCard);
+          break;
+      }
+    });
+  }
+
+  $(".draggable").draggable({
+    revert: "invalid",
+    helper: "clone",
+    cursor: "move",
+  });
+}
 
 // Todo: create a function to handle adding a new task
 function handleAddTask(event) {}
