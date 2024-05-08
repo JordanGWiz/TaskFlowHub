@@ -71,7 +71,37 @@ function renderTaskList() {
 }
 
 // Todo: create a function to handle adding a new task
-function handleAddTask(event) {}
+function handleAddTask(event) {
+  event.preventDefault();
+
+  const titleEl = $("#task-title").val();
+  const dateEl = $("#task-due-date").val();
+  const taskDescriptionEl = $("#task-description").val();
+
+  generateTaskId();
+
+  // Initialize taskList if it is null
+  taskList = taskList || [];
+
+  const newTask = {
+    id: nextId,
+    title: titleEl,
+    dueDate: dateEl,
+    description: taskDescriptionEl,
+    status: "to-do",
+  };
+
+  taskList.push(newTask);
+  localStorage.setItem("tasks", JSON.stringify(taskList));
+
+  renderTaskList();
+
+  $("#task-title").val("");
+  $("#task-due-date").val("");
+  $("#task-description").val("");
+
+  $("#formModal").modal("hide");
+}
 
 // Todo: create a function to handle deleting a task
 function handleDeleteTask(event) {}
@@ -80,4 +110,8 @@ function handleDeleteTask(event) {}
 function handleDrop(event, ui) {}
 
 // Todo: when the page loads, render the task list, add event listeners, make lanes droppable, and make the due date field a date picker
-$(document).ready(function () {});
+$(document).ready(function () {
+  $("#saveTaskButton").click(function (event) {
+    handleAddTask(event);
+  });
+});
