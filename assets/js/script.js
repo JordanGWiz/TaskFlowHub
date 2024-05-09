@@ -29,7 +29,7 @@ function createTaskCard(task) {
   cardBody.append(cardDescription, cardDueDate, cardDeleteBtn);
 
   // Background color based on due date
-  if (task.dueDate) {
+  if (task.dueDate && task.status !== "done") {
     const now = dayjs();
     const dueDate = dayjs(task.dueDate);
     if (now.isSame(dueDate, "day")) {
@@ -72,11 +72,6 @@ function renderTaskList() {
   });
 
   // Make the task cards draggable
-  $(".draggable").draggable({
-    revert: "invalid",
-    helper: "clone",
-    cursor: "move",
-  });
 }
 // Todo: create a function to handle adding a new task
 function handleAddTask(event) {
@@ -123,11 +118,25 @@ function handleDeleteTask(event) {
 }
 
 // Todo: create a function to handle dropping a task into a new status lane
-function handleDrop(event, ui) {}
+function handleDrop(event, ui) {
+  const droppedTask = taskList.find(
+    (task) => task.id === ui.item.data("task-id")
+  );
+  droppedTask.status = $(event.target).data("status");
+  localStorage.setItem("tasks", JSON.stringify(taskList));
+  renderTaskList();
+}
 
 // Todo: when the page loads, render the task list, add event listeners, make lanes droppable, and make the due date field a date picker
 $(document).ready(function () {
   $("#saveTaskButton").click(function (event) {
     handleAddTask(event);
   });
+
+  $("#todo-cards, #in-progress-cards, #done-cards").sortable({
+    connectWith: ".card-list",
+    receive: handleDrop,
+  });
+
+  renderTaskList();
 });
