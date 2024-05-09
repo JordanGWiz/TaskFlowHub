@@ -25,6 +25,9 @@ function createTaskCard(task) {
     .attr("data-task-id", task.id);
   cardDeleteBtn.on("click", handleDeleteTask);
 
+  // Append delete button to the task card
+  cardBody.append(cardDescription, cardDueDate, cardDeleteBtn);
+
   // Background color based on due date
   if (task.dueDate) {
     const now = dayjs();
@@ -46,30 +49,35 @@ function createTaskCard(task) {
 function renderTaskList() {
   taskList = JSON.parse(localStorage.getItem("tasks")) || [];
 
-  if (taskList) {
-    taskList.forEach((task) => {
-      const taskCard = createTaskCard(task);
-      switch (task.status) {
-        case "to-do":
-          $("#todo-cards").append(taskCard);
-          break;
-        case "in-progress":
-          $("#in-progress-cards").append(taskCard);
-          break;
-        case "done":
-          $("#done-cards").append(taskCard);
-          break;
-      }
-    });
-  }
+  // Clear existing task cards in each status lane
+  $("#todo-cards").empty();
+  $("#in-progress-cards").empty();
+  $("#done-cards").empty();
 
+  // Re-render the task list by creating new task cards
+  taskList.forEach((task) => {
+    const taskCard = createTaskCard(task);
+
+    switch (task.status) {
+      case "to-do":
+        $("#todo-cards").append(taskCard);
+        break;
+      case "in-progress":
+        $("#in-progress-cards").append(taskCard);
+        break;
+      case "done":
+        $("#done-cards").append(taskCard);
+        break;
+    }
+  });
+
+  // Make the task cards draggable
   $(".draggable").draggable({
     revert: "invalid",
     helper: "clone",
     cursor: "move",
   });
 }
-
 // Todo: create a function to handle adding a new task
 function handleAddTask(event) {
   event.preventDefault();
@@ -104,7 +112,15 @@ function handleAddTask(event) {
 }
 
 // Todo: create a function to handle deleting a task
-function handleDeleteTask(event) {}
+function handleDeleteTask(event) {
+  const taskId = $(event.target).attr("data-task-id");
+
+  taskList = taskList.filter((task) => task.id !== parseInt(taskId));
+
+  localStorage.setItem("tasks", JSON.stringify(taskList));
+
+  renderTaskList(); // Re-render the task list after deletion
+}
 
 // Todo: create a function to handle dropping a task into a new status lane
 function handleDrop(event, ui) {}
